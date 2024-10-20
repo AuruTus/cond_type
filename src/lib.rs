@@ -26,13 +26,19 @@ where
     (val_t, val_f).get_cval()
 }
 
+macro_rules! choose {
+    ($cond:expr, $val_t:expr, $val_f:expr) => {
+        $crate::get_cond_val::<{ $cond }, _, _>($val_t, $val_f)
+    };
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn test_sized_struct() {
-        struct ST {}
+        struct ST;
         let _a = get_cond_val::<true, _, _>(ST {}, 1);
         let _a = get_cond_val::<false, _, _>(ST {}, 1);
     }
@@ -43,7 +49,7 @@ mod tests {
             fn test_dyn(&self);
         }
 
-        struct ST {}
+        struct ST;
         impl Trt for ST {
             fn test_dyn(&self) {}
         }
@@ -52,5 +58,12 @@ mod tests {
         let c = "123456";
         let _a = get_cond_val::<true, _, _>(b, c);
         let _a = get_cond_val::<false, _, _>(_a, c);
+    }
+
+    #[test]
+    fn test_const_expr() {
+        struct ST;
+        let _a = choose!(1 < 2, ST {}, 2);
+        let _a = choose!(2 > 1, _a, ST {});
     }
 }
